@@ -285,6 +285,8 @@ public class Main {
                 answer += beautifulHex(Integer.toHexString(64+Integer.parseInt(regDict.get(instruction[1]),2)));
                 }
             }
+
+
             else if(instruction[0].equals("dec")){
                 if(registerSize==1)
                     answer+= "fe ";
@@ -318,7 +320,7 @@ public class Main {
                 if(registerSize==1)
                     return "Error: can't pop 8bit register";
                 else if(registerSize==2)
-                    answer+="66";
+                    answer+="66 ";
                 answer += beautifulHex(Integer.toHexString(88 + Integer.parseInt(regDict.get(instruction[1]),2)));
             }
     }
