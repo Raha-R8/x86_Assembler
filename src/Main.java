@@ -30,11 +30,7 @@ public class Main {
                 i++;
             size = 2 - counter % 3;
         }
-        System.out.println(regDict.get("al"));
-        System.out.println(regDict.get("bl"));
 
-        System.out.println(regSize.get("al"));
-        System.out.println(regSize.get("bl"));
         //*********************************************************************************
         Dictionary<String, String> labelDict = new Hashtable<>();
         Dictionary<Integer, String[]> jmpDict = new Hashtable<>();
