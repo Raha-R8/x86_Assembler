@@ -1,0 +1,11 @@
+add eax,ecx
+jmp L1
+add eax,ecx
+first:
+xor [eax],ebx
+inc di
+jmp first
+push 113
+pop ebp
+and ax,si
+L1:
