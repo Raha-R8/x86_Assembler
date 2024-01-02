@@ -52,8 +52,12 @@ public class Main {
                 String[] instruction;
                 instruction = line.split("[,  ]+");
                 if (instruction.length == 3) {
+                    if(instruction[1].equals("esp") || instruction[2].equals("esp"))
+                        System.out.println("Warning this register is an exception so the answer might lack a prefix");
                     answer += twoOperandAssembler(regSize, opDict, regDict, instruction);
                 } else if (instruction.length == 2) {
+                    if(instruction[1].equals("esp"))
+                        System.out.println("Warning this register is an exception so the answer might lack a prefix");
                     answer += oneOperandAssembler(regSize, opDict, regDict, instruction);
                 }
                 if(answer.equals(""))
@@ -82,7 +86,7 @@ public class Main {
             }
 
             String finalAnswer;
-            String[] jmpParameters = new String[2];
+            //String[] jmpParameters = new String[2];
             String address = "0000000000000000";
             int fileline = 0;
 
@@ -104,9 +108,13 @@ public class Main {
                         answer += twoOperandAssembler(regSize, opDict, regDict, instruction);
                     } else if (instruction.length == 2) {
                         if (instruction[0].equals("jmp")) {
-                            jmpParameters[0] = address;//offset of the jump instruction
+                            //System.out.println(address);
+                            String[] jmpParameters = new String[2];
+                            jmpParameters[0] = address ;//offset of the jump instruction
                             jmpParameters[1] = instruction[1];//the label jump wants to go to
                             jmpDict.put(fileline, jmpParameters);
+                            //this is put here just to fix the issue of address increment of jump
+                           // answer = "eb 00";
                         } else
                             answer += oneOperandAssembler(regSize, opDict, regDict, instruction);
                     } else {
@@ -114,7 +122,7 @@ public class Main {
                         if (instruction[0].charAt(instruction[0].length() - 1) == ':') {
                             //System.out.println(address);
                             labelDict.put(instruction[0].replace(":", ""), address);
-                        }
+                        };
                         answer += " ";
                     }
                     if (answer.split(":")[0].equals("Error")) {
@@ -122,7 +130,7 @@ public class Main {
                         return;
                     }
                     finalAnswer = address + " " + answer;
-                    address = getInstructionAddress(address, answer);
+                    address = getInstructionAddress(address, answer,instruction[0]);
                     //append the answer to instructions array
                     instructions.add(finalAnswer);
                     //this variable shows what line we are currently at
@@ -141,8 +149,10 @@ public class Main {
             Enumeration<Integer> keys = jmpDict.keys();
             while (keys.hasMoreElements()) {
                 index = keys.nextElement();
+               // System.out.println(jmpDict.get(index)[0]);
                 labelOffset = labelDict.get(jmpDict.get(index)[1]);
                 jmpOffset = jmpDict.get(index)[0];
+               // System.out.println(jmpOffset);
                 answer = jmpOffset + " " + jmpOpcode(labelOffset, jmpOffset);
                 instructions.set(index, answer);
             }
@@ -383,11 +393,14 @@ public class Main {
             string = "0" + string;
         return string;
     }
-    public static String getInstructionAddress(String previousInstructionAddress,String answer){
+    public static String getInstructionAddress(String previousInstructionAddress,String answer,String jumpcheck){
+
         String temp ;
         if(answer.equalsIgnoreCase(" "))
             return previousInstructionAddress;
         int size  =  answer.split(" ").length;
+        if(jumpcheck.equals("jmp"))
+            size  = 2;
         temp = Integer.toHexString(size + Integer.valueOf(Integer.parseInt(previousInstructionAddress, 16)));
         int len = temp.length();
         for(int i = 0;i<16-len;i++)
@@ -396,15 +409,16 @@ public class Main {
     }
     //method to find the answer for jmp instruction using offsets
     public static String jmpOpcode(String labelOffset,String jmpOffset){
+
         String answer = "eb ";
         int jmp = Integer.valueOf(Integer.parseInt(labelOffset, 16)) - Integer.valueOf(Integer.parseInt(jmpOffset, 16));
         if(jmp >127 || jmp<-127)
             return "Error: the instruction is not a short jump";
         if(jmp<0) //it is a backward jump
-            jmp +=2;
-        else  //it is a forward jump
             jmp -=2;
-        System.out.println(jmp);
+//        if(jmp>0)
+//            jmp +=2;
+
         answer += beautifulHex(Integer.toHexString(jmp));
         return answer;
     }
